@@ -1,0 +1,258 @@
+"""Generator for notebooks/07_multi_agent_a2a.ipynb."""
+
+from build_notebook import code, md, write
+
+cells = [
+    md(
+        "# 07 — Multi-Agent + A2A\n"
+        "\n"
+        "So far our system is **vertical**: one agent, many tools (via MCP). Now we go **horizontal**: "
+        "multiple specialized agents talking to each other.\n"
+        "\n"
+        "**Two protocols, two jobs:**\n"
+        "- **MCP** = vertical. App ↔ tool. \"How does my agent reach a database?\"\n"
+        "- **A2A** = horizontal. Agent ↔ agent. \"How does my coordinator delegate to a research specialist?\"\n"
+        "\n"
+        "They're complementary, not competitive. A real multi-agent system uses both: A2A for delegation, "
+        "MCP for each agent to access its private tool stack.\n"
+        "\n"
+        "**By the end of this notebook you will:**\n"
+        "1. Read an **AgentCard** at `/.well-known/agent-card.json` — A2A's discovery primitive\n"
+        "2. Send a task via `tasks/send` JSON-RPC and get a result\n"
+        "3. Run **two researcher agents** as A2A servers (each with their own ReAct loop and MCP tools)\n"
+        "4. Run a **Coordinator** that decomposes a topic, fans out via A2A, synthesizes a brief\n"
+        "\n"
+        "Lecture reference: **S7 §7** (A2A protocol).\n"
+    ),
+    md(
+        "## 1. The architecture we're building\n"
+        "\n"
+        "```\n"
+        "                                  Coordinator\n"
+        "                          (decomposes + synthesizes)\n"
+        "                                       │\n"
+        "             ┌─────────────────────────┼─────────────────────────┐\n"
+        "             │                         │                         │\n"
+        "          A2A                       A2A                       A2A\n"
+        "  tasks/send {q1}            tasks/send {q2}           tasks/send {q3}\n"
+        "             │                         │                         │\n"
+        "             ▼                         ▼                         ▼\n"
+        "       Researcher #1             Researcher #2             Researcher #3\n"
+        "      (ReAct + MCP)             (ReAct + MCP)             (ReAct + MCP)\n"
+        "             │                         │                         │\n"
+        "          web_search +              same                      same\n"
+        "          fetch_url\n"
+        "```\n"
+        "\n"
+        "Each researcher is a fully independent process with its own LLM, its own tool registry, its own "
+        "ReAct loop. They could be on different machines, written in different languages, owned by "
+        "different teams. **A2A is what makes them composable.**"
+    ),
+    md(
+        "## 2. The AgentCard\n"
+        "\n"
+        "Every A2A agent publishes a JSON document at a well-known URL. Read ours:"
+    ),
+    code(
+        "from deepbrief.a2a.agent_card import researcher_card\n"
+        "import json\n"
+        "\n"
+        "card = researcher_card(public_url=\"http://localhost:9001\")\n"
+        "print(json.dumps(card.model_dump(), indent=2))"
+    ),
+    md(
+        "Think of this as the **digital business card** for an agent: name, version, what skills it has, "
+        "what auth it expects, what input/output formats it accepts. An agent registry can crawl "
+        "`/.well-known/agent-card.json` across an organization and build a directory by skill. **Service "
+        "Discovery for the agent world.**\n"
+    ),
+    md(
+        "## 3. Spin up two researchers\n"
+        "\n"
+        "We'll run two researcher servers on ports 9001 and 9002. Each is the same code but a different "
+        "process — that's the whole point. In production they could be different vendors / frameworks."
+    ),
+    code(
+        "import os, subprocess, sys, time\n"
+        "\n"
+        "subprocess.run([\"pkill\", \"-f\", \"deepbrief.agents.researcher\"], capture_output=True)\n"
+        "time.sleep(1)\n"
+        "\n"
+        "researchers = []\n"
+        "for port in [9001, 9002]:\n"
+        "    proc = subprocess.Popen(\n"
+        "        [sys.executable, \"-m\", \"deepbrief.agents.researcher\", \"--port\", str(port)],\n"
+        "        stdout=subprocess.PIPE, stderr=subprocess.PIPE,\n"
+        "        env=os.environ.copy(),\n"
+        "    )\n"
+        "    researchers.append(proc)\n"
+        "    print(f\"Researcher on :{port}  pid={proc.pid}\")\n"
+        "\n"
+        "time.sleep(3)   # FastAPI/uvicorn startup is ~1-2s per process\n"
+        "for p, port in zip(researchers, [9001, 9002]):\n"
+        "    print(f\":{port} alive={p.poll() is None}\")"
+    ),
+    md(
+        "## 4. Discover them by fetching the card"
+    ),
+    code(
+        "from deepbrief.a2a.client import fetch_agent_card\n"
+        "\n"
+        "for port in [9001, 9002]:\n"
+        "    card = await fetch_agent_card(f\"http://localhost:{port}\")\n"
+        "    print(f\":{port} → {card.name} v{card.version}\")\n"
+        "    print(f\"   skills: {[s.id for s in card.skills]}\")"
+    ),
+    md(
+        "## 5. Send a task with `tasks/send`\n"
+        "\n"
+        "This is the JSON-RPC 2.0 call. The server runs its full ReAct loop (web_search → fetch_url → reason) "
+        "and returns the final agent message."
+    ),
+    code(
+        "from deepbrief.a2a.client import send_task\n"
+        "\n"
+        "reply = await send_task(\n"
+        "    \"http://localhost:9001\",\n"
+        "    \"What is the Model Context Protocol (MCP)? Who created it and when?\",\n"
+        ")\n"
+        "print(reply)"
+    ),
+    md(
+        "Look at the wire form. The JSON-RPC call we just made:\n"
+        "\n"
+        "```jsonc\n"
+        "POST http://localhost:9001/a2a\n"
+        "Content-Type: application/json\n"
+        "\n"
+        "{\n"
+        "  \"jsonrpc\": \"2.0\",\n"
+        "  \"id\": \"<uuid>\",\n"
+        "  \"method\": \"tasks/send\",\n"
+        "  \"params\": {\n"
+        "    \"message\": {\n"
+        "      \"role\": \"user\",\n"
+        "      \"parts\": [{\"text\": \"What is the Model Context Protocol...\"}]\n"
+        "    }\n"
+        "  }\n"
+        "}\n"
+        "```\n"
+        "\n"
+        "And the response:\n"
+        "```jsonc\n"
+        "{\n"
+        "  \"jsonrpc\": \"2.0\", \"id\": \"<same-uuid>\",\n"
+        "  \"result\": {\n"
+        "    \"task\": {\n"
+        "      \"id\": \"<task-uuid>\", \"state\": \"completed\",\n"
+        "      \"messages\": [\n"
+        "        {\"role\": \"user\", \"parts\": [...]},\n"
+        "        {\"role\": \"agent\", \"parts\": [{\"text\": \"...the answer...\"}]}\n"
+        "      ]\n"
+        "    }\n"
+        "  }\n"
+        "}\n"
+        "```\n"
+        "\n"
+        "We're using **synchronous** `tasks/send` — client waits for the agent to finish. Real A2A also "
+        "supports streaming (SSE) and push-notification webhooks for long-running tasks (a 30-min "
+        "research job). Same protocol, different execution mode. We won't implement those here."
+    ),
+    md(
+        "## 6. Coordinator: decompose → fan out → synthesize\n"
+        "\n"
+        "Read the Coordinator class first:"
+    ),
+    code(
+        "import inspect\n"
+        "from deepbrief.agents.coordinator import Coordinator\n"
+        "\n"
+        "# Show the methods (not the full prompt strings)\n"
+        "src = inspect.getsource(Coordinator)\n"
+        "print(src)"
+    ),
+    md(
+        "Notice: **the coordinator does not use ReAct internally.** Its workflow is deterministic — "
+        "decompose, fan out, synthesize. The only LLM steps are the two creative ones (decomposition and "
+        "synthesis). This is the **bounded autonomy** pattern from S8 §5: workflow with LLM steps "
+        "embedded, NOT a free agent. It's predictable, auditable, and ~5× cheaper than letting an agent "
+        "loop figure out the same plan.\n"
+    ),
+    md(
+        "## 7. Run a full research job\n"
+        "\n"
+        "Pick a topic and watch the coordinator delegate. Each call to `Coordinator.run()` makes:\n"
+        "- 1 LLM call to decompose\n"
+        "- N parallel A2A calls (one per sub-question)\n"
+        "- 1 LLM call to synthesize\n"
+        "\n"
+        "Inside each researcher, the ReAct loop makes its own LLM + tool calls."
+    ),
+    code(
+        "from dotenv import load_dotenv\n"
+        "load_dotenv()\n"
+        "\n"
+        "coordinator = Coordinator(researcher_urls=[\n"
+        "    \"http://localhost:9001\",\n"
+        "    \"http://localhost:9002\",\n"
+        "])\n"
+        "\n"
+        "TOPIC = \"State of the Model Context Protocol (MCP) in 2026\"\n"
+        "draft = await coordinator.run(TOPIC)\n"
+        "\n"
+        "print(\"=== SUB-QUESTIONS ===\")\n"
+        "for i, q in enumerate(draft.subquestions, 1):\n"
+        "    print(f\"{i}. {q}\")\n"
+        "\n"
+        "print(\"\\n=== RESEARCHER NOTES ===\")\n"
+        "for i, n in enumerate(draft.notes, 1):\n"
+        "    print(f\"\\n--- note {i} ---\")\n"
+        "    print(n[:400] + ('...' if len(n) > 400 else ''))\n"
+        "\n"
+        "print(\"\\n=== SYNTHESIZED BRIEF ===\")\n"
+        "print(draft.markdown)"
+    ),
+    md(
+        "## 8. What this composition gives you\n"
+        "\n"
+        "Try this thought experiment: replace researcher 1 with a *different vendor's* agent — say, an "
+        "agent built with LangGraph instead of our raw OpenAI loop. As long as it speaks A2A "
+        "(`/.well-known/agent-card.json` + `tasks/send`), the coordinator doesn't need to change. **That's "
+        "the whole pitch of A2A.** Multi-vendor, multi-framework, swap any node without rewiring.\n"
+        "\n"
+        "Compare with calling functions directly: you'd be locked to one process, one language, one "
+        "framework. Compare with putting everything in MCP: MCP doesn't have task IDs, multi-turn "
+        "conversation state, or push-callback semantics — it's the wrong tool for agent-to-agent.\n"
+    ),
+    md(
+        "## 9. Cleanup"
+    ),
+    code(
+        "for proc in researchers:\n"
+        "    proc.terminate()\n"
+        "    try:\n"
+        "        proc.wait(timeout=5)\n"
+        "    except subprocess.TimeoutExpired:\n"
+        "        proc.kill()\n"
+        "print(\"researchers stopped\")"
+    ),
+    md(
+        "## 10. Self-check\n"
+        "\n"
+        "1. MCP solves vertical integration (app ↔ tool). What does A2A solve? When would you reach for one vs the other?\n"
+        "2. What's the role of the AgentCard? Where does it live? Why is `/.well-known/` the convention?\n"
+        "3. The coordinator doesn't use ReAct internally — why is a deterministic workflow the right choice for it?\n"
+        "4. We used synchronous `tasks/send`. When would you switch to streaming or push notifications?\n"
+        "5. If researcher #2 crashes mid-task, what does the coordinator see? How would you make it more robust?\n"
+        "\n"
+        "## What's next\n"
+        "\n"
+        "Notebook **08** — the **Capstone**. Wire everything together with one final piece: a **Human-in-the-loop "
+        "editor** that gates the brief before it's saved to disk. This is the S8 §5.5 *Tier 2 sync HITL* "
+        "pattern — and it's exactly how Deep Research products in production handle the \"AI generated "
+        "this, do you actually want to publish it?\" decision."
+    ),
+]
+
+write("notebooks/07_multi_agent_a2a.ipynb", cells)
+print("wrote notebooks/07_multi_agent_a2a.ipynb")
