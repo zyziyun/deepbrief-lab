@@ -62,6 +62,19 @@ Run notebooks:
 uv run jupyter lab notebooks/
 ```
 
+## Tests
+
+51 unit tests for the library code (`src/deepbrief/`). No API keys, no network — runs in ~1.5 seconds:
+
+```bash
+uv sync --extra dev      # one-time
+uv run pytest            # run all tests
+uv run pytest -v         # show each test name
+uv run pytest -k editor  # filter by name
+```
+
+See [`tests/README.md`](tests/README.md) for the full guide (how to run a single test, coverage, async/ASGI patterns, etc.).
+
 ## Repo Layout
 
 ```
