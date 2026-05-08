@@ -1,5 +1,7 @@
 # DeepBrief — Build Your Own Deep Research
 
+![DeepBrief](banner.png)
+
 A hands-on lab for students learning to build production-grade LLM agents. You'll build a minimal **Deep Research clone** — a multi-agent system that takes a topic and produces a structured brief with citations — across 9 self-contained Jupyter notebooks.
 
 This lab is the practical companion to lectures **S7 (MCP & Agent Protocols)** and **S8 (Agents: Foundations)**.
