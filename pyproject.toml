@@ -20,6 +20,11 @@ dependencies = [
     "jupyterlab>=4.0",
     "ipykernel>=6.29",
     "ipywidgets>=8.1",
+    # S9 — Orchestration (notebooks 07b, 08 ext, 09)
+    "langgraph>=0.2",
+    "langgraph-checkpoint-sqlite>=2.0",
+    "redis>=5.0",
+    "sse-starlette>=2.0",
 ]
 
 [project.optional-dependencies]
