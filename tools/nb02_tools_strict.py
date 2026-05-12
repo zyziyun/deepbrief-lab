@@ -19,6 +19,22 @@ cells = [
         "Lecture reference: **S8 §3.5** (tool layer) and **S8 §6** (tool design + hallucination).\n"
     ),
     md(
+        "## Setup\n"
+        "\n"
+        "Load env vars **before** importing anything that constructs an OpenAI client at import / "
+        "init time. `ReActAgent.__init__` eagerly creates `AsyncOpenAI()`, which reads "
+        "`OPENAI_API_KEY` from the process env — if the env isn't loaded yet, the import crashes "
+        "with `OpenAIError: Missing credentials`."
+    ),
+    code(
+        "import os\n"
+        "from dotenv import load_dotenv\n"
+        "\n"
+        "load_dotenv()\n"
+        "assert os.getenv(\"OPENAI_API_KEY\"), \"Set OPENAI_API_KEY in .env before continuing\"\n"
+        "print(\"env loaded ·\", \"OPENAI_API_KEY: ✅\")"
+    ),
+    md(
         "## 1. The pieces, side by side\n"
         "\n"
         "Three small files in `src/deepbrief/tools/`:\n"
