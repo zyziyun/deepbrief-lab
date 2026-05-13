@@ -39,3 +39,6 @@ trace.jsonl
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Course material — kept local, not pushed to GitHub
+docs/
