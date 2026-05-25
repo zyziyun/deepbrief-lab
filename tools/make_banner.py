@@ -95,7 +95,7 @@ def main() -> None:
         draw.line([(60, y), (W - 60, y)], fill=LINE, width=1)
 
     # Top label — small kicker
-    draw.text((80, 110), "VOYAGEAI · S7 + S8", font=META_FONT, fill=ACCENT)
+    draw.text((80, 110), "AGENTS · MCP · A2A · LANGGRAPH", font=META_FONT, fill=ACCENT)
 
     # Headline
     draw.text((78, 170), "DeepBrief", font=TITLE_FONT, fill=WHITE)
@@ -115,8 +115,8 @@ def main() -> None:
 
     # Bottom-right meta block
     meta = [
-        "9 notebooks   ·   1.7k LoC",
-        "51 tests in 1.2s",
+        "12 notebooks   ·   2.9k LoC",
+        "55 tests in 1.3s",
         "github.com/zyziyun/deepbrief-lab",
     ]
     for i, line in enumerate(meta):
