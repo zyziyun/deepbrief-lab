@@ -24,19 +24,19 @@ Editor (HITL gate)    you approve / reject / edit before it's saved
 brief.md              with [1][2] citations and a sources list
 ```
 
-## Notebook → Lecture Map
+## Notebooks
 
-| # | Notebook | Lecture sections covered |
-|---|---|---|
-| 00 | Setup | — |
-| 01 | The Agent Loop | S8 §3 |
-| 02 | Tools & Strict Mode | S8 §3.5, §6 |
-| 03 | Termination & Cost | S8 §4 |
-| 04 | FastMCP Server | S7 §5 |
-| 05 | MCP Transports | S7 §4 |
-| 06 | MCP in the Agent | S7 §3 |
-| 07 | Multi-Agent + A2A | S7 §7 |
-| 08 | HITL Capstone | S8 §5.5 |
+| # | Notebook |
+|---|---|
+| 00 | Setup |
+| 01 | The Agent Loop |
+| 02 | Tools & Strict Mode |
+| 03 | Termination & Cost |
+| 04 | FastMCP Server |
+| 05 | MCP Transports |
+| 06 | MCP in the Agent |
+| 07 | Multi-Agent + A2A |
+| 08 | HITL Capstone |
 
 Each notebook is independent — you can jump in anywhere. The capstone (08) wires everything together.
 

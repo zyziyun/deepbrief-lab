@@ -5,7 +5,7 @@ we pause until a human approves, edits, or rejects. **Durable state** —
 approval requests are written to disk so they survive process restarts (a
 production agent might be a worker that gets recycled mid-task).
 
-The 4-tier HITL taxonomy (S8 §5.5):
+The 4-tier HITL taxonomy:
   Tier 0 — Read-only, idempotent. Auto. (DB read, web search.)
   Tier 1 — Non-critical writes, low blast radius. Logged async. (file ticket.)
   Tier 2 — Irreversible writes, $ involved. **Sync HITL.** (Send email, write

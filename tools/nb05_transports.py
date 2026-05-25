@@ -19,8 +19,6 @@ cells = [
         "2. See the `Mcp-Session-Id` header that makes Streamable HTTP stateful\n"
         "3. Build a second MCP server (`cache_server`) and connect to it remotely\n"
         "4. Pick the right transport for a given deployment\n"
-        "\n"
-        "Lecture reference: **S7 §4**.\n"
     ),
     md(
         "## 1. The decision table\n"

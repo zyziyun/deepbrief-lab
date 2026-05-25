@@ -6,11 +6,11 @@ replacement for the hand-rolled A2A coordinator used in notebook 07.
 
 What LangGraph gives us that the hand-rolled version doesn't:
 - **TypedDict state with reducers** — `findings` field aggregates in parallel
-  branches without silent data loss (lecture S9 §2.3).
+  branches without silent data loss.
 - **Dynamic fan-out via `Send`** — sub-question count is decided at runtime,
-  not compile time (S9 §2.5).
+  not compile time.
 - **Supersteps with all-or-nothing semantics** — if one researcher crashes,
-  the others' results are preserved on the next replay (S9 §2.6).
+  the others' results are preserved on the next replay.
 - **Free state inspection** — `app.get_state_history(config)` gives you the
   full audit trail without writing any logging code.
 
@@ -25,7 +25,6 @@ Architecture:
                                                         ▼
                                                synthesize ──▶ END
 
-Lecture reference: S9 Part 2 (LangGraph mental model), Part 3.4 (the
 combined production shape).
 """
 
@@ -70,7 +69,7 @@ class ResearchState(TypedDict):
     - `sub_questions` — written once by decompose; default reducer.
     - `findings` — written by N parallel research nodes; needs `operator.add`
       so the lists CONCAT instead of clobber. This is the #1 LangGraph beginner
-      gotcha (S9 §2.3).
+      gotcha.
     """
 
     topic: str
@@ -179,7 +178,6 @@ def plan_research(state: ResearchState) -> list[Send]:
     of the `research` node with its own payload. This is map-reduce inside
     LangGraph — the count is decided at runtime, not at graph-build time.
 
-    Reference: S9 §2.5 — "Dynamic fan-out via Send".
     """
     return [
         Send("research", {"question": q})

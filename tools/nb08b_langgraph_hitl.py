@@ -21,8 +21,6 @@ cells = [
         "2. **Kill the Python app object mid-run**, recreate it from scratch, and resume — proving the state is durable\n"
         "3. Resume with `Command(resume=...)` and watch the graph continue from exactly where it paused\n"
         "4. Use `get_state_history` to reproduce the agent's behavior and fork from an earlier point with modified state\n"
-        "\n"
-        "Lecture references: **S9 §3.1** (Checkpointer), **S9 §3.2** (`interrupt()`), **S9 §3.3** (Time travel).\n"
     ),
     md(
         "## 1. Why the hand-rolled `ApprovalStore` isn't enough\n"
@@ -90,7 +88,7 @@ cells = [
         "print(inspect.getsource(review_node))"
     ),
     md(
-        "**The whole new pattern is in `review_node`.** Five things to call out (S9 §3.2):\n"
+        "**The whole new pattern is in `review_node`.** Five things to call out:\n"
         "\n"
         "**(a) `interrupt(payload)` is a function call inside the node.** Not a config flag, not a "
         "decorator. The node decides when to pause — based on state. You can interrupt unconditionally "
@@ -280,11 +278,13 @@ cells = [
     md(
         "## 9. Time travel — inspect every checkpoint\n"
         "\n"
-        "**The senior-grade superpower** (S9 §3.3): `app.get_state_history(config)` returns every "
-        "checkpoint ever taken for this thread. You can inspect them, fork from any of them, replay.\n"
+        "`app.get_state_history(config)` returns every checkpoint ever taken for this thread. "
+        "You can inspect them, fork from any of them, replay.\n"
         "\n"
-        "This is the answer to the interview question *\"a user reports the agent gave a different "
-        "answer this time — how do you reproduce?\"*"
+        "This is how you reproduce a one-off agent failure: pull `get_state_history(thread_id)`, "
+        "find the divergence point (usually a tool call that returned different data), and either "
+        "replay from that checkpoint or fork to test a fix. Without a checkpointer you'd be reading "
+        "logs and guessing."
     ),
     code(
         "# List every checkpoint for the approval thread (the first demo, not the revise demo)\n"
@@ -363,7 +363,7 @@ cells = [
     md(
         "## 11. Mapping back to S8's HITL 4-tier taxonomy\n"
         "\n"
-        "S8 §5.5 said: *\"This taxonomy is not encoded per-agent. It is a fleet-wide policy.\"* "
+        "*\"This taxonomy is not encoded per-agent. It is a fleet-wide policy.\"* "
         "LangGraph gives us the primitives to implement each tier consistently:\n"
         "\n"
         "| Tier | Risk | Lecture mode | LangGraph implementation |\n"

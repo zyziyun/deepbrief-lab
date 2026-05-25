@@ -22,7 +22,6 @@ Tools exposed:
     - cache_clear()          → {cleared: int}
     - cache_stats()          → {size: int, hits: int, misses: int}
 
-Lecture reference: S7 §4 (Streamable HTTP transport).
 """
 
 from __future__ import annotations

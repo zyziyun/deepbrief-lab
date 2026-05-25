@@ -3,7 +3,6 @@
 Uses httpx + readability-lxml to strip nav/ads/boilerplate from HTML pages.
 Always returns at most ~6000 characters to bound prompt size.
 
-Lecture reference: S7 §6.4 (treat tool outputs from web as untrusted input).
 """
 
 from __future__ import annotations

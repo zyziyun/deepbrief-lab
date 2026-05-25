@@ -7,7 +7,6 @@ Pipeline:
 
 The coordinator does NOT use ReAct internally — its decisions are deterministic
 (decompose → fan out → synthesize). This is the *bounded autonomy* pattern from
-S8 §5: an LLM step inside a deterministic workflow.
 """
 
 from __future__ import annotations

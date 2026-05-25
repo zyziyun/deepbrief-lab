@@ -21,8 +21,6 @@ cells = [
         "2. Send a task via `tasks/send` JSON-RPC and get a result\n"
         "3. Run **two researcher agents** as A2A servers (each with their own ReAct loop and MCP tools)\n"
         "4. Run a **Coordinator** that decomposes a topic, fans out via A2A, synthesizes a brief\n"
-        "\n"
-        "Lecture reference: **S7 §7** (A2A protocol).\n"
     ),
     md(
         "## 1. The architecture we're building\n"
@@ -174,7 +172,7 @@ cells = [
     md(
         "Notice: **the coordinator does not use ReAct internally.** Its workflow is deterministic — "
         "decompose, fan out, synthesize. The only LLM steps are the two creative ones (decomposition and "
-        "synthesis). This is the **bounded autonomy** pattern from S8 §5: workflow with LLM steps "
+        "synthesis). This is the **bounded autonomy** pattern workflow with LLM steps "
         "embedded, NOT a free agent. It's predictable, auditable, and ~5× cheaper than letting an agent "
         "loop figure out the same plan.\n"
     ),
@@ -248,7 +246,7 @@ cells = [
         "## What's next\n"
         "\n"
         "Notebook **08** — the **Capstone**. Wire everything together with one final piece: a **Human-in-the-loop "
-        "editor** that gates the brief before it's saved to disk. This is the S8 §5.5 *Tier 2 sync HITL* "
+        "editor** that gates the brief before it's saved to disk. This is the *Tier 2 sync HITL* "
         "pattern — and it's exactly how Deep Research products in production handle the \"AI generated "
         "this, do you actually want to publish it?\" decision."
     ),

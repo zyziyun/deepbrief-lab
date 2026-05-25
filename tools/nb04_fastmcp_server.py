@@ -17,8 +17,6 @@ cells = [
         "2. Inspect it with the **MCP Inspector** (the `curl` of MCP development)\n"
         "3. Connect a Python client and run the full lifecycle (initialize → list_tools → call_tool)\n"
         "4. See the real JSON-RPC 2.0 traffic that flows under the hood\n"
-        "\n"
-        "Lecture reference: **S7 §3** (lifecycle), **S7 §5** (build a server).\n"
     ),
     md(
         "## 1. Why FastMCP\n"
@@ -156,7 +154,7 @@ cells = [
         "- A **Tools** tab — list + call buttons (auto-renders forms from your schemas)\n"
         "- A **Resources** / **Prompts** tab — empty in our case (we only expose tools)\n"
         "\n"
-        "Try this drill (it's the kind of thing you'd do during a senior interview if asked to debug):\n"
+        "Try this drill:\n"
         "\n"
         "1. Click **Connect**\n"
         "2. **Tools** tab → **List Tools** → you should see `save_note`, `list_notes`, `read_note`, `delete_note`\n"
@@ -169,7 +167,7 @@ cells = [
     md(
         "## 6. Why we exposed *tools*, not *resources* or *prompts*\n"
         "\n"
-        "MCP servers can expose three primitives (S7 §2.2):\n"
+        "MCP servers can expose three primitives:\n"
         "\n"
         "| Primitive | REST analogy | Who controls it |\n"
         "|---|---|---|\n"

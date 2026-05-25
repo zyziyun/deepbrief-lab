@@ -16,7 +16,6 @@ Tools exposed:
     - read_note(note_id)             → {title, content, created_at}
     - delete_note(note_id)           → {ok: bool}
 
-Lecture reference: S7 §5 (Build an MCP server).
 """
 
 from __future__ import annotations

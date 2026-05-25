@@ -18,8 +18,6 @@ cells = [
         "2. Register a mix of native tools + MCP tools into one `ToolRegistry`\n"
         "3. Run a real research mini-agent: search the web → fetch a page → save findings as MCP notes\n"
         "4. See namespacing (`notes__save_note`) prevent tool-name collisions\n"
-        "\n"
-        "Lecture reference: **S7 §3** (lifecycle), **S7 §6.3** (namespacing as defense).\n"
     ),
     md(
         "## 1. Read the adapter\n"
@@ -96,7 +94,7 @@ cells = [
         "Notice the **namespacing**: `notes__save_note` and `cache__cache_get`. The native tools "
         "(`web_search`, `fetch_url`) keep simple names because we own them. If we hadn't namespaced, "
         "two MCP servers exposing a `search` tool would collide — and we'd silently call the wrong one. "
-        "Tool-name shadowing is a real attack class (S7 §6.3).\n"
+        "Tool-name shadowing is a real attack class.\n"
     ),
     md(
         "## 4. Verify the adapter works end-to-end"

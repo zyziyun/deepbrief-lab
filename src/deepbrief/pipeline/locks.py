@@ -1,4 +1,4 @@
-"""IdempotencyLock — the Redis SETNX pattern from S9 §5.2.
+"""IdempotencyLock — the Redis SETNX pattern
 
 Queues at-least-once-deliver. If a worker crashes after running the agent
 but before acking, the task gets redelivered. Without idempotency, you run
@@ -8,7 +8,7 @@ The pattern: **SETNX** (SET if Not eXists) — atomic claim semantics.
 
 The release uses a Lua script for **atomic check-and-delete**. Without this,
 if the lock TTL expires between your GET and DEL, you might delete a
-*different* worker's lock. Mention the Lua script in interviews to show
+*different* worker's lock.
 you've shipped this.
 """
 

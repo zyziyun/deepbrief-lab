@@ -15,8 +15,6 @@ cells = [
         "ignores your tools and answers from training\n"
         "3. See the loop actually do useful multi-step work when forced\n"
         "4. Add the four production necessities: bounded steps, parallel tool calls, error isolation, observability\n"
-        "\n"
-        "Lecture reference: **S8 §3** (*Implementing the Agent Loop*).\n"
     ),
     md(
         "## Setup"
@@ -213,13 +211,6 @@ cells = [
         "**distributions**: \"the agent calls the right tool 87% of the time\" — not \"the agent calls "
         "the right tool\" (a meaningless statement). This is why eval frameworks (Langfuse, Braintrust, "
         "LangSmith) all default to multi-run sampling.\n"
-        "\n"
-        "**Interview signal:** if someone shows you one happy-path trace and concludes \"the agent "
-        "works,\" they haven't shipped agents in production."
-    ),
-    md(
-        "### Lesson 2 — Partial loop + late bypass is the dangerous failure mode\n"
-        "\n"
         "Trace shape A — the *partial-loop* one — is what you should be afraid of.\n"
         "\n"
         "The model **used the tool a few times**, then **jumped to a memory answer for the final step**. "
@@ -233,14 +224,6 @@ cells = [
         "(stock price, inventory count, DB lookup), the answer is *not* grounded even though tools were called.\n"
         "- **Hard to detect at scale** — the answer might be right, might be wrong; you only catch it on "
         "the wrong ones, and you only catch wrong ones via downstream complaints.\n"
-        "\n"
-        "**Senior interview answer:** *\"The classic agent failure mode in 2026 isn't hallucinated tool "
-        "names — modern models rarely do that. It's the **partial-grounding** problem: the model calls "
-        "tools for a few steps, then synthesizes a final answer that bypasses the latest tool results. "
-        "Trace counts are not grounding proofs. To enforce grounding you need either output validators "
-        "that check the answer is derivable from the captured tool results, or structured outputs that "
-        "reference tool call IDs by construction.\"*\n"
-        "\n"
         "**The 2023→2026 narrative shift:**\n"
         "\n"
         "| What 2023 tutorials said | What 2026 models actually do |\n"

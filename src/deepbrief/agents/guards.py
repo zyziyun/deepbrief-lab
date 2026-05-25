@@ -6,7 +6,6 @@ budgets.** Even a perfectly-prompted agent can spiral when an upstream tool
 returns ambiguous data — a real public incident reported a 150× cost overrun
 on what was previously a 3-step task.
 
-Lecture reference: S8 §4 (termination, defense in depth).
 """
 
 from __future__ import annotations
@@ -35,7 +34,7 @@ class CostMeter:
     """Tracks USD spent on LLM calls for a single agent run.
 
     Hard-stops when `budget_usd` is exceeded. Pair with per-user / per-tenant
-    caps in Redis for production (see S8 §4.4).
+    caps in Redis for production.
     """
 
     budget_usd: float

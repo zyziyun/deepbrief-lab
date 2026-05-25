@@ -21,7 +21,6 @@ Architecture diff vs `langgraph_brief.py`:
                                        └────────────────┘
                                        if reviewer says "revise"
 
-Lecture references: S9 §3.1 (Checkpointer), §3.2 (interrupt), §3.3 (time travel).
 """
 
 from __future__ import annotations
@@ -85,7 +84,6 @@ def review_node(state: CapstoneState) -> dict:
         4. when `app.invoke(Command(resume=value), config=config)` is called
            later, this `interrupt(...)` call returns `value`
 
-    See S9 §3.2.
 
     The payload format is by convention — there's no required shape. We use
     a structured dict so a UI can render approve / reject / edit affordances

@@ -1,4 +1,4 @@
-"""Redis Streams as the durable queue from S9 §5.1.
+"""Redis Streams as the durable queue
 
 Streams give us: durable storage (messages survive Redis restart), consumer
 groups (multiple workers compete for messages), explicit ack, and dead-letter

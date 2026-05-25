@@ -4,7 +4,6 @@ Tavily is one of the few search APIs with a meaningful free tier (1000/month).
 For students without a key we ship a `MockSearchTool` that returns canned
 results, so notebook 06+ runs without a Tavily account.
 
-Lecture reference: S8 §6.3 (tool design).
 """
 
 from __future__ import annotations

@@ -6,11 +6,10 @@ notebooks (multi-agent, HITL) can compose multiple agents.
 Design choices:
 - Uses `ToolRegistry` for dispatch (never raises on bad tool name/args)
 - `parallel_tool_calls=True` so independent calls happen in one round-trip
-- Captures a structured `trace` for observability (S8 §7)
+- Captures a structured `trace` for observability
 - On `max_steps` exhaustion, forces a final answer with `tool_choice="none"`
-  instead of raising (S8 §4.5: graceful termination)
+  instead of raising
 
-Lecture reference: S8 §3 (loop), §4.5 (graceful termination).
 """
 
 from __future__ import annotations

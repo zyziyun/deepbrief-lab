@@ -7,7 +7,6 @@ agent reads schemas via `get_openai_tools()` and dispatches via `execute()`.
 exceptions all become `ToolResult(success=False, error=...)` returned to
 the LLM as an observation. The LLM almost always self-corrects.
 
-Lecture reference: S8 §3.5.
 """
 
 from __future__ import annotations

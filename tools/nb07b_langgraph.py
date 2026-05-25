@@ -17,8 +17,6 @@ cells = [
         "3. Hit and fix the **#1 LangGraph beginner gotcha** — silent data loss in parallel branches without a reducer\n"
         "4. Inspect the graph's **state history** for free — preview of time-travel debugging (full coverage in 08)\n"
         "\n"
-        "Lecture references: **S9 §2** (LangGraph mental model), **S9 §3.3** (time travel preview).\n"
-        "\n"
         "**What this notebook does NOT add yet:**\n"
         "- `SqliteSaver` checkpointer (notebook 08)\n"
         "- `interrupt()` for HITL (notebook 08)\n"
@@ -154,13 +152,6 @@ cells = [
         "**Read the error message carefully** — it's actively telling you the fix: *\"Use an Annotated "
         "key.\"* That's `Annotated[list[Finding], operator.add]`. The fixed version below runs and "
         "produces all 3 findings.\n"
-        "\n"
-        "**Senior interview answer** (S9 §2.3): *\"In a multi-agent LangGraph system with no reducer on "
-        "a multi-writer field, modern LangGraph raises `InvalidUpdateError` at the superstep barrier. "
-        "Pre-1.0 versions silently kept the last write. Either way the fix is the same: declare "
-        "`Annotated[list, operator.add]` for accumulators, `add_messages` for conversation history, or a "
-        "custom function for dedup-aware merge. The runtime now forces correctness instead of letting "
-        "you debug nondeterministic data loss.\"*\n"
     ),
     md(
         "## 5. The nodes\n"
@@ -246,7 +237,7 @@ cells = [
         "print(result[\"draft\"])"
     ),
     md(
-        "**What just happened, in superstep terms** (S9 §2.6):\n"
+        "**What just happened, in superstep terms**:\n"
         "\n"
         "- **Superstep 1**: `decompose` ran alone. 1 LLM call. Wrote `sub_questions` to state.\n"
         "- **Superstep 2**: `plan_research` returned N `Send` objects → **N `research` nodes ran in parallel** "
@@ -255,7 +246,7 @@ cells = [
         "\n"
         "If a researcher had crashed in superstep 2, the others' results would have been persisted as "
         "**pending writes** — on retry, only the failed researcher would replay, not all of them. That's "
-        "the all-or-nothing superstep trap (S9 §2.6) working in your favor when paired with a checkpointer.\n"
+        "the all-or-nothing superstep trap working in your favor when paired with a checkpointer.\n"
     ),
     md(
         "## 9. Inspect the execution as a stream of typed events\n"
@@ -296,7 +287,7 @@ cells = [
         "But once we add `SqliteSaver` in notebook 08, the same API gives us **every superstep's state** "
         "as an inspectable snapshot.\n"
         "\n"
-        "This is how you answer the senior interview question:\n"
+        ""
         "\n"
         "> *\"A user reports the agent gave a different answer this time for the same query. Walk me through "
         "how you'd reproduce.\"*\n"
@@ -329,7 +320,7 @@ cells = [
     md(
         "## 12. When NOT to use LangGraph\n"
         "\n"
-        "Honesty check (S9 §6):\n"
+        "Honesty check:\n"
         "\n"
         "- **Pipeline-shaped task** — same exact steps every time → use a plain Python function with "
         "`asyncio.gather`. No `StateGraph`. \n"

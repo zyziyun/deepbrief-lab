@@ -1,4 +1,4 @@
-"""ResultStore — durable result persistence from S9 §5.4 step 5.
+"""ResultStore — durable result persistence step 5.
 
 The lecture uses MongoDB (`mongo.runs.insert_one(...)`). For the lab we
 use SQLite because it's zero-dep and writes survive process restart, which
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS runs (
 
 
 class ResultStore:
-    """SQLite-backed result store. Drop-in for MongoDB in S9 §5 patterns."""
+    """SQLite-backed result store. Drop-in for MongoDB."""
 
     def __init__(self, path: str | Path = "./data/runs.db") -> None:
         self.path = str(path)

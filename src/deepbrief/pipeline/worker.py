@@ -1,6 +1,6 @@
-"""The full worker loop — S9 §5.4, with subtle ordering preserved.
+"""The full worker loop, with subtle ordering preserved.
 
-The order of the six steps matters. Wrong order shows up in interviews as
+The order of the six steps matters. Wrong order
 silent data loss or double-billing. Keep this file as the canonical
 reference for the pattern; copy from here.
 

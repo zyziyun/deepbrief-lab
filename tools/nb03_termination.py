@@ -19,8 +19,6 @@ cells = [
         "2. Build a `LoopGuard` that fingerprints repeated tool calls\n"
         "3. Wire both into the agent loop *with graceful termination* — never a 500 to the user\n"
         "4. See each defense fire on a synthetic input designed to trigger it\n"
-        "\n"
-        "Lecture reference: **S8 §4** (Termination — the senior-level chapter).\n"
     ),
     md(
         "## 1. Why agents loop forever (real causes)\n"
@@ -280,7 +278,7 @@ cells = [
     md(
         "## 7. The five caps you need\n"
         "\n"
-        "We've shown two of them. A production-grade stack has all five (S8 §4.2):\n"
+        "We've shown two of them. A production-grade stack has all five:\n"
         "\n"
         "| Cap | What it bounds | Where it lives |\n"
         "|---|---|---|\n"

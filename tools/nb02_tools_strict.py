@@ -15,8 +15,6 @@ cells = [
         "2. Build a `ToolRegistry` that dispatches safely (never raises)\n"
         "3. Turn on OpenAI's `strict: True` and watch it kill an entire class of bugs\n"
         "4. See *why tool descriptions* are 60% of agent quality\n"
-        "\n"
-        "Lecture reference: **S8 §3.5** (tool layer) and **S8 §6** (tool design + hallucination).\n"
     ),
     md(
         "## Setup\n"
@@ -60,7 +58,7 @@ cells = [
         "We'll port the `add` tool from notebook 01 to the new shape. Three things to notice:\n"
         "\n"
         "1. **`name`** is `verb_noun`, not `add` alone — easier for the LLM to disambiguate at scale\n"
-        "2. **`description`** has *what* + *when to call* — see S8 §6.3\n"
+        "2. **`description`** has *what* + *when to call*\n"
         "3. **`additionalProperties: False`** is required for `strict: True` to be accepted by the API"
     ),
     code(
@@ -178,14 +176,6 @@ cells = [
         "On `gpt-4o-mini` you'll usually see both produce `{\"a\": 17, \"b\": 25}` — the model's strong enough "
         "that strict mode isn't *strictly* necessary. The point is: with strict on, it's **guaranteed**. "
         "On weaker open-source models or longer schemas, ~3-5% of calls without strict come back malformed.\n"
-        "\n"
-        "**Senior interview answer:** *\"Strict mode pushes schema enforcement from runtime validation to decode "
-        "time. Same correctness budget, half the round-trips, and a class of bugs (`{\"city\": \"Tokyo, Japan\"}` "
-        "when schema says enum) becomes statistically zero.\"*"
-    ),
-    md(
-        "## 6. Tool descriptions are 60% of agent quality\n"
-        "\n"
         "Same tool, different descriptions. Watch which one the LLM actually picks correctly."
     ),
     code(
@@ -245,7 +235,7 @@ cells = [
         "the LLM disambiguate cleanly. Without the negative case, you'd see `weather_now` called for "
         "future-weather questions ~30% of the time on `gpt-4o-mini`.\n"
         "\n"
-        "**The rule** *(S8 §6.3)*: every tool description has three parts in this order:\n"
+        "**The rule**: every tool description has three parts in this order:\n"
         "1. What the tool does\n"
         "2. WHEN to call it\n"
         "3. WHEN NOT to call it"

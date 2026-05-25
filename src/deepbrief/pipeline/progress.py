@@ -1,4 +1,4 @@
-"""ProgressEmitter — Redis Pub/Sub progress events from S9 §5.3.
+"""ProgressEmitter — Redis Pub/Sub progress events
 
 Long-running agents (10-60s) need progress signals so the UI doesn't look
 frozen. Two common backends: Redis Pub/Sub (lightweight, ephemeral) or Kafka

@@ -7,7 +7,6 @@ need to be non-blocking so the agent can run them in parallel.
 `ToolResult` is the uniform return shape — every tool returns one of these.
 Tools NEVER raise; failures become `ToolResult(success=False, error=...)`
 so the agent loop can pass the error back to the LLM as an observation.
-See S8 §3.5 and §6.3 for the rationale.
 """
 
 from __future__ import annotations

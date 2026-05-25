@@ -13,7 +13,7 @@ Two design choices to call out:
 2. **Namespacing.** Tool names are prefixed with the server name
    (`notes__save_note`, `cache__cache_get`). Without this, two MCP servers
    that both register a `search` tool would collide — and tool-name
-   shadowing is a real attack vector. See S7 §6.3.
+   shadowing is a real attack vector..
 
 Usage:
     from mcp.client.streamable_http import streamablehttp_client

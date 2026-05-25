@@ -13,7 +13,6 @@ Endpoints:
         result: {"task": {"id": "...", "state": "completed",
                           "messages": [..., {"role": "agent", "parts": [{"text": "..."}]}]}}
 
-Lecture reference: S7 §7 (A2A protocol).
 """
 
 from __future__ import annotations

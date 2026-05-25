@@ -20,10 +20,8 @@ cells = [
         "1. Enqueue tasks to a Redis Stream and watch a worker consume them\n"
         "2. See the **SETNX idempotency lock** prevent double-execution under simulated redelivery\n"
         "3. Stream progress events via Redis Pub/Sub as the agent runs\n"
-        "4. Verify the **six-step ordering** from S9 §5.4 — consume → check → lock → run → store → ack\n"
+        "4. Verify the **six-step ordering** — consume → check → lock → run → store → ack\n"
         "5. (Optional) Wire in the real LangGraph brief from notebook 07b for end-to-end\n"
-        "\n"
-        "Lecture reference: **S9 Part 5** (entire chapter maps to this notebook).\n"
     ),
     md(
         "## 1. Start Redis\n"
@@ -140,7 +138,6 @@ cells = [
         "Your `DEL` then deletes *their* lock. The Lua script bundles GET+DEL into one atomic operation "
         "Redis executes without interruption.\n"
         "\n"
-        "**Senior interview tip:** when asked about distributed locks, *mention the Lua script*. It's "
         "the single piece of evidence that you've shipped this pattern instead of read about it."
     ),
     md(
@@ -206,7 +203,7 @@ cells = [
     md(
         "## 6. The six-step worker loop\n"
         "\n"
-        "Now the heart of S9 §5.4. Read the source. **The order of these steps is the interview answer.**"
+        "Now the heart. Read the source. **The order of these steps.**"
     ),
     code(
         "from deepbrief.pipeline.worker import make_handler\n"
@@ -218,7 +215,7 @@ cells = [
         "print(src)"
     ),
     md(
-        "**The order that matters** (S9 §5.5):\n"
+        "**The order that matters**:\n"
         "\n"
         "| Step | Why this order |\n"
         "|---|---|\n"
@@ -408,7 +405,7 @@ cells = [
     md(
         "## 12. What you've built\n"
         "\n"
-        "Look back at the lecture S9 §5.1 diagram. You now have **every box**:\n"
+        "Look back at the lecture diagram. You now have **every box**:\n"
         "\n"
         "- ✅ Producer → enqueue + a FastAPI app at `api.py`\n"
         "- ✅ Queue → Redis Stream `agent:runs`, durable + consumer-group aware\n"
@@ -451,7 +448,7 @@ cells = [
         "\n"
         "- **Dead-letter queue** — when a task fails 3 times, XCLAIM it to a `dead_letter` group; surface to ops.\n"
         "- **Backpressure** — track stream length; refuse new enqueues above a threshold.\n"
-        "- **Trace integration** — emit OpenTelemetry GenAI spans (S8 §7.2) so the full request-trace shows worker latency, LLM latency, tool latency.\n"
+        "- **Trace integration** — emit OpenTelemetry GenAI spans so the full request-trace shows worker latency, LLM latency, tool latency.\n"
         "\n"
         "Each is ~half a day of work on top of what you have.\n"
     ),
