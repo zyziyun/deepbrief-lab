@@ -22,16 +22,20 @@ from openai import AsyncOpenAI
 from deepbrief.a2a.client import send_task
 
 
+# NOTE: JSON braces are doubled ({{ and }}) because this string goes through
+# str.format(). Single { / } would be interpreted as format placeholders and
+# raise KeyError on the JSON keywords. This is a real footgun caught in
+# notebook 07 production runs.
 DECOMPOSE_PROMPT = """You decompose research topics into focused sub-questions.
 
 Given a TOPIC, output JSON:
-{
+{{
   "subquestions": [
     "<focused question 1>",
     "<focused question 2>",
     ...
   ]
-}
+}}
 
 Rules:
 - 3 to 5 sub-questions

@@ -67,7 +67,7 @@ class MCPToolAdapter(BaseTool):
     async def execute(self, **kwargs: Any) -> ToolResult:
         t0 = time.time()
         try:
-            content_text, is_error = await self._call(kwargs)
+            blocks, is_error = await self._call(kwargs)
         except Exception as e:
             return ToolResult(
                 tool_name=self.name,
@@ -77,22 +77,34 @@ class MCPToolAdapter(BaseTool):
                 latency_ms=int((time.time() - t0) * 1000),
             )
 
-        # MCP tool returns are typed content blocks; we collapse to text and try JSON
-        try:
-            output: Any = json.loads(content_text)
-        except (json.JSONDecodeError, TypeError):
-            output = content_text
+        # FastMCP returns multi-item results as separate content blocks
+        # (one TextContent per list element). Parse each block individually
+        # so list_notes() and friends return a real list of dicts, not a
+        # blob of concatenated JSON.
+        #   1 block  → unwrap to scalar / dict
+        #   N blocks → keep as list
+        output: Any
+        if len(blocks) == 1:
+            output = blocks[0]
+        else:
+            output = blocks
 
         return ToolResult(
             tool_name=self.name,
             input_args=kwargs,
             output=output if not is_error else None,
             success=not is_error,
-            error=content_text if is_error else None,
+            error=str(output) if is_error else None,
             latency_ms=int((time.time() - t0) * 1000),
         )
 
-    async def _call(self, kwargs: dict) -> tuple[str, bool]:
+    async def _call(self, kwargs: dict) -> tuple[list[Any], bool]:
+        """Open an MCP session, call the tool, parse each content block.
+
+        Returns (parsed_blocks, is_error). Each block is either a parsed
+        JSON value or its raw text — the caller decides how to combine
+        single-vs-multi-block responses.
+        """
         if self._url:
             async with streamablehttp_client(url=self._url) as (read, write, _):
                 async with ClientSession(read, write) as session:
@@ -104,8 +116,14 @@ class MCPToolAdapter(BaseTool):
                     await session.initialize()
                     r = await session.call_tool(self._tool_name, arguments=kwargs)
 
-        text = "\n".join(getattr(c, "text", str(c)) for c in r.content)
-        return text, bool(r.isError)
+        blocks: list[Any] = []
+        for c in r.content:
+            text = getattr(c, "text", str(c))
+            try:
+                blocks.append(json.loads(text))
+            except (json.JSONDecodeError, TypeError):
+                blocks.append(text)
+        return blocks, bool(r.isError)
 
 
 def _strictify(schema: dict) -> dict:
