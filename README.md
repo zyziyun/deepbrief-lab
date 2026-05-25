@@ -69,7 +69,7 @@ uv run jupyter lab notebooks/
 
 ## Tests
 
-51 unit tests for the library code (`src/deepbrief/`). No API keys, no network — runs in ~1.5 seconds:
+55 unit tests for the library code (`src/deepbrief/`). No API keys, no network — runs in ~1.3 seconds:
 
 ```bash
 uv sync --extra dev      # one-time
@@ -84,13 +84,14 @@ See [`tests/README.md`](tests/README.md) for the full guide (how to run a single
 
 ```
 deepbrief-lab/
-├── notebooks/                      # 9 self-contained Jupyter notebooks
-├── src/deepbrief/                  # reusable package — used by capstone
-│   ├── tools/                      # BaseTool, ToolRegistry, web_search, fetch_url
-│   ├── agents/                     # ReActAgent, coordinator, researcher, editor
-│   ├── mcp_servers/                # notes_server (stdio), cache_server (HTTP)
-│   └── a2a/                        # AgentCard + JSON-RPC server
-└── tests/
+├── notebooks/                      # 12 self-contained Jupyter notebooks (00-09 + 07b + 08b)
+├── src/deepbrief/                  # reusable package — used by capstones
+│   ├── tools/                      # BaseTool, ToolRegistry, web_search, fetch_url, mcp_adapter
+│   ├── agents/                     # ReActAgent, coordinator, researcher, editor, langgraph_*
+│   ├── mcp_servers/                # notes_server (stdio + HTTP), cache_server (HTTP-only)
+│   ├── a2a/                        # AgentCard + JSON-RPC server + client
+│   └── pipeline/                   # Redis Streams worker, locks, progress, store, FastAPI api
+└── tests/                          # 55 pytest unit tests for the library
 ```
 
 ## Credits
