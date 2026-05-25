@@ -430,7 +430,8 @@ cells = [
         "await redis.delete(STREAM)\n"
         "for key in await redis.keys(\"agent:lock:*\"):\n"
         "    await redis.delete(key)\n"
-        "await redis.close()\n"
+        "# Use aclose() — close() is deprecated in redis-py 5.0.1+\n"
+        "await redis.aclose()\n"
         "store.close()\n"
         "print(\"closed Redis + sqlite\")"
     ),
