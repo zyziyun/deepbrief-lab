@@ -119,9 +119,14 @@ cells = [
         "g_buggy.add_edge(\"worker\", END)\n"
         "\n"
         "buggy_app = g_buggy.compile()\n"
-        "buggy_result = await buggy_app.ainvoke({\"items\": []})\n"
-        "print(\"WITHOUT reducer:\", buggy_result)\n"
-        "print(\"  → expected 3 items, got\", len(buggy_result[\"items\"]))"
+        "try:\n"
+        "    buggy_result = await buggy_app.ainvoke({\"items\": []})\n"
+        "    print(\"WITHOUT reducer:\", buggy_result)\n"
+        "    print(\"  → expected 3 items, got\", len(buggy_result['items']))\n"
+        "except Exception as e:\n"
+        "    print(f\"WITHOUT reducer: 💥 {type(e).__name__}\")\n"
+        "    # Print the first line of the error — it tells you the fix\n"
+        "    print(f\"  → {str(e).splitlines()[0]}\")"
     ),
     code(
         "# ─── version B: WITH reducer (the fix) ───────────────────────────────\n"
@@ -141,13 +146,21 @@ cells = [
         "print(\"  → expected 3 items, got\", len(fixed_result[\"items\"]))"
     ),
     md(
-        "**This is the gotcha**. The buggy version loses two of the three findings. The fix is one line — "
-        "wrap the type with `Annotated[..., reducer]`.\n"
+        "**The buggy version doesn't even run** — modern LangGraph (1.x) raises\n"
+        "`InvalidUpdateError: At key 'items': Can receive only one value per step. "
+        "Use an Annotated key to handle multiple values.` This is **better than the historical "
+        "behavior** (silent data loss), but you still have to know what an `Annotated` key is to fix it.\n"
         "\n"
-        "**Senior interview answer** (S9 §2.3): *\"In a multi-agent LangGraph system, what happens if two "
-        "parallel branches both modify the same state field with no reducer? The second write silently clobbers "
-        "the first. Default reducer is overwrite. Declare `Annotated[list, operator.add]` for accumulators, "
-        "`add_messages` for conversation history, or a custom function for dedup-aware merge.\"*\n"
+        "**Read the error message carefully** — it's actively telling you the fix: *\"Use an Annotated "
+        "key.\"* That's `Annotated[list[Finding], operator.add]`. The fixed version below runs and "
+        "produces all 3 findings.\n"
+        "\n"
+        "**Senior interview answer** (S9 §2.3): *\"In a multi-agent LangGraph system with no reducer on "
+        "a multi-writer field, modern LangGraph raises `InvalidUpdateError` at the superstep barrier. "
+        "Pre-1.0 versions silently kept the last write. Either way the fix is the same: declare "
+        "`Annotated[list, operator.add]` for accumulators, `add_messages` for conversation history, or a "
+        "custom function for dedup-aware merge. The runtime now forces correctness instead of letting "
+        "you debug nondeterministic data loss.\"*\n"
     ),
     md(
         "## 5. The nodes\n"
@@ -264,9 +277,17 @@ cells = [
         "    print(f\"  {n:3d}  {kind}\")"
     ),
     md(
-        "Notice the volume of `on_chat_model_*` events — each LLM call inside each ReAct loop inside each "
-        "researcher emits start/stream/end events. **You get full LLM-level observability without writing "
-        "a single trace.append() call** — this is the LangGraph value-add over the hand-rolled S8 loop.\n"
+        "What you see are **`on_chain_*` events** — one per node start/end/stream inside the graph. The "
+        "graph has 3 nodes (`decompose`, `research`, `synthesize`), invoked once per superstep, plus the "
+        "internal aggregators — that's where the 8 starts/ends come from.\n"
+        "\n"
+        "**You'll notice NO `on_chat_model_*` events.** That's intentional: our nodes use the raw "
+        "`AsyncOpenAI` client directly, not a `langchain_openai.ChatOpenAI` wrapper. The LangGraph runtime "
+        "only sees the nodes — not the LLM calls inside them. **If you swap the raw OpenAI client for "
+        "`ChatOpenAI`**, you instantly get per-token `on_chat_model_stream` events for free (great for UI "
+        "progress bars), at the cost of an extra abstraction layer. The lab picks the raw client to keep "
+        "the diff against notebook 01's `client.chat.completions.create` legible — but in production you "
+        "usually want the events. **Both are valid; the tradeoff is observability-richness vs. SDK depth.**\n"
     ),
     md(
         "## 10. Preview: state history (full coverage in notebook 08)\n"
