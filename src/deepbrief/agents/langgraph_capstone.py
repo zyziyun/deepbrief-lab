@@ -186,13 +186,30 @@ def build_capstone_app(checkpointer: Any) -> Any:
     """Compile the capstone with a checkpointer.
 
     The checkpointer is **required** here — `interrupt()` doesn't work
-    without one. Pass `SqliteSaver` for single-machine / portfolio use,
-    `AsyncPostgresSaver` for production multi-process.
+    without one.
+
+    **Async/sync gotcha (this lab uses async everywhere):**
+
+    Our nodes are async (`async def`) and we invoke with `await app.ainvoke(...)`.
+    The checkpointer must therefore also be async-compatible. Use:
+
+      - `AsyncSqliteSaver` from `langgraph.checkpoint.sqlite.aio`  (single-machine demo)
+      - `AsyncPostgresSaver` from `langgraph.checkpoint.postgres.aio`  (production)
+
+    **Do NOT pass `SqliteSaver` (sync)** — it raises `NotImplementedError` on
+    `aget_tuple()` the first time the async loop tries to read state. The error
+    message is helpful but the failure happens after the graph has started,
+    so it's a confusing way to learn this.
+
+    The sync `SqliteSaver` is fine if you also invoke synchronously
+    (`app.invoke(...)` instead of `await app.ainvoke(...)`) — but our nodes
+    are async, so we need the async path end to end.
     """
     if checkpointer is None:
         raise ValueError(
             "build_capstone_app requires a checkpointer — interrupt() needs durable state. "
-            "Pass SqliteSaver(...) for dev or AsyncPostgresSaver(...) for production."
+            "Pass AsyncSqliteSaver(...) for dev or AsyncPostgresSaver(...) for production. "
+            "Do NOT pass sync SqliteSaver — our nodes are async."
         )
     return build_capstone_graph().compile(checkpointer=checkpointer)
 

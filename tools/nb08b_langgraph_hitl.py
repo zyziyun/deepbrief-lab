@@ -4,7 +4,7 @@ from build_notebook import code, md, write
 
 cells = [
     md(
-        "# 08b — Capstone Upgrade: `SqliteSaver` + `interrupt()` + Time Travel\n"
+        "# 08b — Capstone Upgrade: `AsyncSqliteSaver` + `interrupt()` + Time Travel\n"
         "\n"
         "Notebook 08 built a tier-2 HITL gate **by hand** — `ApprovalStore` with a `pending/` "
         "directory of JSON files and a 500ms polling loop. It works. It's also exactly the kind of "
@@ -12,7 +12,7 @@ cells = [
         "\n"
         "This notebook replaces all of it with **three LangGraph primitives**:\n"
         "\n"
-        "1. **Checkpointer** (`SqliteSaver`) — every superstep's state survives process restart\n"
+        "1. **Checkpointer** (`AsyncSqliteSaver` — sqlite-backed, async-friendly) — every superstep's state survives process restart\n"
         "2. **`interrupt()`** — durable HITL inside a node, no polling, no approval table\n"
         "3. **Time travel** — `app.get_state_history(config)` returns every checkpoint; fork + replay any of them\n"
         "\n"
@@ -60,7 +60,9 @@ cells = [
         "load_dotenv()\n"
         "assert os.getenv(\"OPENAI_API_KEY\"), \"Set OPENAI_API_KEY in .env\"\n"
         "\n"
-        "from langgraph.checkpoint.sqlite import SqliteSaver\n"
+        "# ⚠️ Use the *async* SqliteSaver — our nodes are async, sync SqliteSaver\n"
+        "# raises NotImplementedError on aget_tuple() the first time the graph reads state.\n"
+        "from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver\n"
         "from langgraph.types import Command\n"
         "\n"
         "# We use a tempfile-backed sqlite db so this notebook is hermetic.\n"
@@ -113,14 +115,15 @@ cells = [
         "Two-step compile:"
     ),
     code(
-        "# SqliteSaver from_conn_string is a context manager. For the notebook we keep it open\n"
-        "# for the duration of the cells using contextlib.ExitStack so multiple cells can share it.\n"
-        "from contextlib import ExitStack\n"
+        "# AsyncSqliteSaver.from_conn_string is an **async** context manager.\n"
+        "# We use AsyncExitStack so we can keep it open across multiple notebook cells\n"
+        "# while still cleaning up correctly at the end.\n"
+        "from contextlib import AsyncExitStack\n"
         "\n"
-        "stack = ExitStack()\n"
-        "checkpointer = stack.enter_context(SqliteSaver.from_conn_string(DB_PATH))\n"
+        "stack = AsyncExitStack()\n"
+        "checkpointer = await stack.enter_async_context(AsyncSqliteSaver.from_conn_string(DB_PATH))\n"
         "app = build_capstone_app(checkpointer)\n"
-        "print(\"app compiled with SqliteSaver — interrupt() will work\")"
+        "print(\"app compiled with AsyncSqliteSaver — interrupt() will work\")"
     ),
     md(
         "**Why is the checkpointer required?**\n"
@@ -176,18 +179,19 @@ cells = [
         "5. Inspect the state — it should be sitting at the `review` interrupt\n"
     ),
     code(
-        "# Drop the old app reference\n"
+        "# Drop the old app reference (async cleanup)\n"
         "del app, checkpointer\n"
-        "stack.close()\n"
+        "await stack.aclose()\n"
         "print(\"Old app + checkpointer destroyed.\\n\")\n"
         "\n"
         "# Recreate from scratch — same DB, same thread_id\n"
-        "stack = ExitStack()\n"
-        "new_checkpointer = stack.enter_context(SqliteSaver.from_conn_string(DB_PATH))\n"
+        "stack = AsyncExitStack()\n"
+        "new_checkpointer = await stack.enter_async_context(AsyncSqliteSaver.from_conn_string(DB_PATH))\n"
         "app = build_capstone_app(new_checkpointer)\n"
         "print(\"New app compiled. Reading state from sqlite...\\n\")\n"
         "\n"
-        "snapshot = app.get_state(config)\n"
+        "# Use the async variant — our checkpointer is async-only\n"
+        "snapshot = await app.aget_state(config)\n"
         "print(f\"  current values keys:   {list(snapshot.values.keys())}\")\n"
         "print(f\"  next node to execute:  {snapshot.next}\")\n"
         "print(f\"  __interrupt__ pending? {bool(snapshot.tasks)}\")\n"
@@ -284,7 +288,8 @@ cells = [
     ),
     code(
         "# List every checkpoint for the approval thread (the first demo, not the revise demo)\n"
-        "snapshots = list(app.get_state_history(config))\n"
+        "# `aget_state_history` is an async iterator — collect into a list\n"
+        "snapshots = [s async for s in app.aget_state_history(config)]\n"
         "print(f\"Total snapshots: {len(snapshots)}\\n\")\n"
         "\n"
         "for i, snap in enumerate(snapshots):\n"
@@ -334,8 +339,8 @@ cells = [
         "        \"summary\": \"[DOCTORED FOR TIME-TRAVEL DEMO] First finding now says MCP was created by the Linux Foundation in 2024 — wrong on purpose.\",\n"
         "    }\n"
         "\n"
-        "# update_state writes a new checkpoint at the fork point\n"
-        "app.update_state(fork_config, {\"findings\": doctored_findings, \"draft\": None})\n"
+        "# aupdate_state writes a new checkpoint at the fork point (async variant)\n"
+        "await app.aupdate_state(fork_config, {\"findings\": doctored_findings, \"draft\": None})\n"
         "\n"
         "# Re-invoke from the fork — synthesize re-runs with the doctored findings\n"
         "forked = await app.ainvoke(None, config=fork_config)\n"
@@ -374,7 +379,7 @@ cells = [
         "## 12. Cleanup"
     ),
     code(
-        "stack.close()\n"
+        "await stack.aclose()\n"
         "if os.path.exists(DB_PATH):\n"
         "    os.remove(DB_PATH)\n"
         "    print(f\"removed {DB_PATH}\")"
