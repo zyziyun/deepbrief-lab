@@ -2,9 +2,9 @@
 
 ![DeepBrief](banner.png)
 
-A hands-on lab for students learning to build production-grade LLM agents. You'll build a minimal **Deep Research clone** — a multi-agent system that takes a topic and produces a structured brief with citations — across 9 self-contained Jupyter notebooks.
+A hands-on lab for students learning to build production-grade LLM agents. You'll build a minimal **Deep Research clone** — a multi-agent system that takes a topic and produces a structured brief with citations — across 12 self-contained Jupyter notebooks.
 
-This lab is the practical companion to lectures **S7 (MCP & Agent Protocols)** and **S8 (Agents: Foundations)**.
+You'll cover: the ReAct agent loop, tool design with strict mode, termination and cost caps, MCP servers and clients (stdio + Streamable HTTP), agent-to-agent communication (A2A), LangGraph orchestration, human-in-the-loop approval gates, and a production worker pipeline with Redis Streams and idempotency locks.
 
 ## What You'll Build
 
@@ -26,19 +26,22 @@ brief.md              with [1][2] citations and a sources list
 
 ## Notebooks
 
-| # | Notebook |
-|---|---|
-| 00 | Setup |
-| 01 | The Agent Loop |
-| 02 | Tools & Strict Mode |
-| 03 | Termination & Cost |
-| 04 | FastMCP Server |
-| 05 | MCP Transports |
-| 06 | MCP in the Agent |
-| 07 | Multi-Agent + A2A |
-| 08 | HITL Capstone |
+| # | Notebook | What you build |
+|---|---|---|
+| 00 | Setup | Env smoke-test (`.env`, OpenAI key, optional Tavily key) |
+| 01 | The Agent Loop | The 6-line ReAct loop, then production-hardened with parallel calls, error isolation, and graceful termination |
+| 02 | Tools & Strict Mode | `BaseTool` ABC, `ToolRegistry`, OpenAI `strict: True`, tool description engineering |
+| 03 | Termination & Cost | `CostMeter` budget cap, `LoopGuard` fingerprint detection, graceful termination on trip |
+| 04 | FastMCP Server | Your first MCP server via `@mcp.tool()`, debugged with the MCP Inspector |
+| 05 | MCP Transports | Same server over stdio AND Streamable HTTP, plus a second `cache_server` |
+| 06 | MCP in the Agent | `MCPToolAdapter` — mixed local Python + remote MCP tools in one registry |
+| 07 | Multi-Agent + A2A | Coordinator + two researcher agents, AgentCard discovery, `tasks/send` JSON-RPC |
+| 07b | LangGraph Rewrite | Same multi-agent pipeline reimplemented on `StateGraph` with reducers and `Send` API |
+| 08 | HITL Capstone | Tier-2 sync approval gate via `ApprovalStore` + `ipywidgets`, full end-to-end DeepBrief |
+| 08b | LangGraph HITL | Same capstone with `AsyncSqliteSaver`, `interrupt()`, and time-travel debugging |
+| 09 | Production Pipeline | FastAPI + Redis Streams + SETNX idempotency lock + SSE progress + SQLite store |
 
-Each notebook is independent — you can jump in anywhere. The capstone (08) wires everything together.
+Each notebook is independent — you can jump in anywhere. The capstone (notebook 08, 08b, or 09) wires everything together.
 
 ## Prereqs
 
@@ -93,7 +96,7 @@ deepbrief-lab/
 ## Credits
 
 Built as a teaching lab for the VoyageAI Full-Stack AI Engineering course.
-Designed by Wendy Yu • Lectures S7/S8 reference material in `docs/`.
+Designed by Wendy Yu.
 
 ## License
 
